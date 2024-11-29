@@ -7,3 +7,4 @@ class User:
         self.user_id = user_id
         self.tg_tag = tg_tag
         self.notify = notify
+
