@@ -1,0 +1,2 @@
+class StaffNotFoundException(Exception):
+    pass

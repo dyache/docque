@@ -1,0 +1,2 @@
+class QueueNotFoundException(Exception):
+    pass

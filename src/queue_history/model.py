@@ -2,7 +2,7 @@ import datetime
 import uuid
 
 
-class Queue:
+class QueueHistory:
     def __init__(self, queue_id: uuid.UUID, position: int, created_at: datetime.time, status: str):
         self.queue_id: uuid.UUID = queue_id
         self.position: int = position
