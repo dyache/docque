@@ -23,5 +23,6 @@ staff_repository = StaffRepository(conn, cur)
 staff_serv = StaffService(staff_repository, pwd_context, settings)
 staff_routes = StaffRoutes(staff_serv)
 
+
 cur.close()
 conn.close()
