@@ -1,6 +1,10 @@
 from typing import List, Optional
 from src.queue.repository import QueueRepository
 from src.queue_history.schema import QueueHistorySchema
+from src.db import cur, conn
+from fastapi import Depends
+from typing import Annotated
+from src.queue_history.repository import QueueHistoryRepository
 
 class QueueHistoryService:
     def __init__(self, queue_repo: QueueRepository):
@@ -22,3 +26,7 @@ class QueueHistoryService:
         except Exception as e:
             print(f"An error occurred: {e}")
             return None
+
+def get_queue_history_service() -> QueueHistoryService:
+    return QueueHistoryService(QueueHistoryRepository(conn,cur), QueueRepository(conn, cur))
+QueueHistoryServiceDep = Annotated[QueueHistoryService, Depends(get_queue_history_service)]

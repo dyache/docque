@@ -12,6 +12,9 @@ from src.config import Config
 from src.staff.models import Staff
 from src.staff.repository import StaffRepository
 from src.staff.schema import StaffSchema, TokenData, StaffCreateSchema
+from src.db import cur, conn
+from fastapi import Depends
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 security = HTTPBearer()
@@ -73,3 +76,6 @@ class StaffService:
             return self.staff_repo.create(model_staff)
         except Exception as e:
             raise RuntimeError(f"error creating staff {e}")
+def get_staff_service() -> StaffService:
+    return StaffService(StaffRepository(conn, cur), Config(conn,cur))
+StaffServiceDep = Annotated[StaffService, Depends(get_staff_service)]
