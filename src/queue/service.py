@@ -1,11 +1,14 @@
 import datetime
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Annotated
 from src.queue.models import Queue
 from src.queue.repository import QueueRepository
 from src.queue.schema import QueueSchema
 from src.queue_history.model import QueueHistory
 from src.queue_history.repository import QueueHistoryRepository
+from src.db import cur, conn
+from fastapi import Depends
+
 
 class QueueService:
     def __init__(self, queue_repo: QueueRepository, queue_history_repo: QueueHistoryRepository):
@@ -39,3 +42,8 @@ class QueueService:
         except Exception as e:
             print(f"An error occurred while retrieving the queue: {e}")
             return None
+
+def get_queue_service() -> QueueService:
+    return QueueService(QueueRepository(conn, cur), QueueHistoryRepository(conn, cur))
+QueueServiceDep = Annotated[QueueService, Depends(get_queue_service)]
+

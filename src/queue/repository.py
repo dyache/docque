@@ -42,3 +42,4 @@ class QueueRepository:
             return queues
         except Exception as e:
             raise RuntimeError(f"Database error occurred: {e}")
+

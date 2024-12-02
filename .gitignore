@@ -1,5 +1,7 @@
 .idea
 .env
+docker-compose.yaml
+test_main.http
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
