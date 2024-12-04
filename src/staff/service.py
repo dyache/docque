@@ -3,18 +3,18 @@ from datetime import datetime, timezone, timedelta
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
+from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, HTTPBearer
 from jwt import InvalidTokenError
 from passlib.context import CryptContext
 
 from src.config import Config
+from src.crypt import pwd_context
+from src.db import cur, conn
 from src.staff.models import Staff
 from src.staff.repository import StaffRepository
 from src.staff.schema import StaffSchema, TokenData, StaffCreateSchema
-from src.db import cur, conn
-from fastapi import Depends
-
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 security = HTTPBearer()
@@ -76,6 +76,10 @@ class StaffService:
             return self.staff_repo.create(model_staff)
         except Exception as e:
             raise RuntimeError(f"error creating staff {e}")
+
+
 def get_staff_service() -> StaffService:
-    return StaffService(StaffRepository(conn, cur), Config(conn,cur))
+    return StaffService(StaffRepository(conn, cur), pwd_context, Config())
+
+
 StaffServiceDep = Annotated[StaffService, Depends(get_staff_service)]

@@ -5,6 +5,7 @@ from src.student.service import StudentServiceDep
 
 student_router = APIRouter()
 
-@student_router.post("/student/")
+
+@student_router.post("/")
 def create(student_serv: StudentServiceDep, student: StudentSchema) -> str:
     return student_serv.create(student)
