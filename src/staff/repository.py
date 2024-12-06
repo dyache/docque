@@ -31,13 +31,14 @@ class StaffRepository:
         query = """
         SELECT staff_id, staff_name, current_queue_number, hashed_password
         FROM staff
-        WHERE name = %s
+        WHERE staff_name = %s
         """
         try:
             self.cursor.execute(query, (name,))
             result = self.cursor.fetchone()
             if result:
-                return Staff(*result)
+                print(result)
+                return Staff(result[0], result[1], result[2], result[3])
             else:
                 raise StaffNotFoundException(f"Staff member with name '{name}' not found")
         except Exception as e:

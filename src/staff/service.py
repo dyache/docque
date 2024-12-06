@@ -24,18 +24,20 @@ class StaffService:
         self.algorithm = config.jwt_algorithm
         self.token_ttl = config.token_ttl_hours
 
-    def hash_password(self, password: str):
+    def hash_password(self, password: str) -> str:
         pwd_bytes = password.encode('utf-8')
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password=pwd_bytes, salt=salt)
-        return hashed_password
+        return hashed_password.decode('utf-8')
 
-    def verify_password(self, plain_password: str, hashed_password: bytes):
+    def verify_password(self, plain_password: str, hashed_password: str):
         password_byte_enc = plain_password.encode('utf-8')
-        return bcrypt.checkpw(password=password_byte_enc, hashed_password=hashed_password)
+        return bcrypt.checkpw(password=password_byte_enc, hashed_password=hashed_password.encode('utf-8'))
 
     def authenticate_staff(self, name: str, password: str) -> bool | StaffSchema:
         staff = self.staff_repo.get_by_name(name)
+        print(staff.hashed_password)
+        print(staff.name)
         if not staff:
             return False
         if not self.verify_password(password, staff.hashed_password):

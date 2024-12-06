@@ -19,12 +19,13 @@ async def login(staff_serv: StaffServiceDep, staff_schema: StaffCreateSchema,
                 headers={"WWW-Authenticate": "Bearer"},
             )
         access_token = staff_serv.create_access_token(
-            data={"sub": staff.staff_id}
+            data={"sub": str(staff.staff_id)}
         )
         return Token(access_token=access_token, token_type="bearer")
     except HTTPException as http_exc:
         raise http_exc
     except Exception as exc:
+        print(exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
