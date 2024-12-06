@@ -1,15 +1,19 @@
-from typing import List
+from typing import List, Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from src.staff.middleware import auth_middleware
 from src.queue.schema import QueueSchema
 from src.queue.service import QueueServiceDep
+from src.staff.schema import StaffSchema
 
 queue_router = APIRouter()
 
 
 @queue_router.post("/")
-def create(queue_serv: QueueServiceDep):
+def create(queue_serv: QueueServiceDep,
+           curr_user: Annotated[StaffSchema, Depends(auth_middleware)]
+           ):
     try:
         return queue_serv.create()
     except Exception as e:
@@ -17,7 +21,9 @@ def create(queue_serv: QueueServiceDep):
 
 
 @queue_router.get("/")
-def get_all(queue_serv: QueueServiceDep) -> List[QueueSchema]:
+def get_all(queue_serv: QueueServiceDep,
+            curr_user: Annotated[StaffSchema, Depends(auth_middleware)]
+            ) -> List[QueueSchema]:
     try:
         return queue_serv.get_all_sort_by_position()
     except Exception as e:

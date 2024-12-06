@@ -1,5 +1,6 @@
 .idea
 .env
+venv
 docker-compose.yaml
 test_main.http
 ### Python template
@@ -129,7 +130,7 @@ celerybeat.pid
 .env
 .venv
 env/
-venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/

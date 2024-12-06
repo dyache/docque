@@ -8,7 +8,8 @@ staff_router = APIRouter()
 
 
 @staff_router.post("/login")
-async def login(staff_serv: StaffServiceDep, staff_schema: StaffCreateSchema):
+async def login(staff_serv: StaffServiceDep, staff_schema: StaffCreateSchema,
+                ):
     try:
         staff = staff_serv.authenticate_staff(staff_schema.name, staff_schema.password)
         if not staff:
@@ -51,6 +52,7 @@ def register(staff_serv: StaffServiceDep, staff_schema: StaffCreateSchema):
     try:
         staff_serv.create_staff(staff_schema)
     except Exception as exc:
+        print(exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",

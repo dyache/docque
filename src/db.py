@@ -18,16 +18,16 @@ CREATE TABLE IF NOT EXISTS Student (
 create_staff_table = """
 CREATE TABLE IF NOT EXISTS Staff (
     staff_id UUID PRIMARY KEY,             
-    name VARCHAR(255) NOT NULL,            
+    staff_name VARCHAR(255) NOT NULL,            
     hashed_password TEXT NOT NULL,         
-    current_queue_number UUID NOT NULL     
+    current_queue_number INT
 );
 """
 
 create_queue_table = """
 CREATE TABLE IF NOT EXISTS Queue (
     queue_id UUID PRIMARY KEY,            
-    position INT NOT NULL,                
+    position SERIAL NOT NULL,                
     created_at TIMESTAMP NOT NULL,        
     status VARCHAR(255) NOT NULL          
 );
@@ -37,7 +37,7 @@ create_queue_history_table = """
 CREATE TABLE IF NOT EXISTS QueueHistory (
     id SERIAL PRIMARY KEY,               
     queue_id UUID NOT NULL,              
-    position INT NOT NULL,                
+    position INT NULL,                
     created_at TIMESTAMP NOT NULL,        
     status VARCHAR(255) NOT NULL          
 );

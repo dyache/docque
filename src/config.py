@@ -9,10 +9,14 @@ class Config(BaseSettings):
     db_password: str = Field(..., json_schema_extra={"env": "DB_PASSWORD"})
     db_name: str = Field(..., json_schema_extra={"env": "DB_NAME"})
 
+    jwt_secret_key: str = Field(..., description="Secret key for JWT encoding/decoding",
+                                json_schema_extra={"env": "JWT_SECRET_KEY"})
+    jwt_algorithm: str = Field(default="HS256", description="Algorithm used for JWT",
+                               json_schema_extra={"env": "JWT_ALGORITHM"})
+    token_ttl_hours: int = Field(default=12, description="Jwt token ttl in hours",
+                                 json_schema_extra={"env": "TOKEN_TTL_HOURS"})
 
-    jwt_secret_key: str = Field(..., description="Secret key for JWT encoding/decoding", json_schema_extra={"env": "JWT_SECRET_KEY"})
-    jwt_algorithm: str = Field(default="HS256", description="Algorithm used for JWT", json_schema_extra={"env": "JWT_ALGORITHM"})
-    token_ttl_hours: int = Field(default=12, description="Jwt token ttl in hours", json_schema_extra={"env": "TOKEN_TTL_HOURS"})
+    tg_bot_api_key: str = Field(..., json_schema_extra={"env": "TG_BOT_API_KEY"})
 
     @field_validator("jwt_algorithm")
     def validate_algorithm(cls, value: str):
@@ -23,5 +27,3 @@ class Config(BaseSettings):
 
     class Config:
         env_file = "./.env"
-
-
