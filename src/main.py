@@ -10,7 +10,7 @@ from src.student.routes import student_router
 
 app = FastAPI(root_path="/api/v1", title="docque API", description="This is qocque queue API", version="1.0.0")
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credential=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.include_router(prefix="/queue", router=queue_router)
 app.include_router(prefix="/staff", router=staff_router)
 app.include_router(prefix="/history", router=queue_history_router)
