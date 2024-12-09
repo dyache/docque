@@ -51,7 +51,7 @@ class StaffRepository:
         WHERE staff_id = %s
         """
         try:
-            self.cursor.execute(query, (staff_id,))
+            self.cursor.execute(query, (str(staff_id),))
             result = self.cursor.fetchone()
             if result:
                 return Staff(*result)
