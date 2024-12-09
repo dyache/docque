@@ -42,6 +42,7 @@ async def get_me(staff_serv: StaffServiceDep,
     except HTTPException as http_exc:
         raise http_exc
     except Exception as exc:
+        print(exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
