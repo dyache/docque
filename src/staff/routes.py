@@ -1,5 +1,8 @@
-from fastapi import HTTPException, status, APIRouter
+from typing import Annotated
 
+from fastapi import HTTPException, status, APIRouter, Depends
+
+from src.staff.middleware import auth_middleware
 from src.staff.schema import StaffCreateSchema, Token, StaffSchema
 from src.staff.service import StaffServiceDep
 
@@ -32,9 +35,10 @@ async def login(staff_serv: StaffServiceDep, staff_schema: StaffCreateSchema,
 
 
 @staff_router.get("/me/", response_model=StaffSchema)
-async def get_me(staff_serv: StaffServiceDep
-                 ) -> StaffSchema:
-    return staff_serv
+async def get_me(
+        curr_user: Annotated[StaffSchema, Depends(auth_middleware)]
+) -> StaffSchema:
+    return curr_user
 
 
 @staff_router.post("/")
