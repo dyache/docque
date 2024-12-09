@@ -1,8 +1,7 @@
-from fastapi import HTTPException, status, Security, APIRouter
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import HTTPException, status, APIRouter
 
 from src.staff.schema import StaffCreateSchema, Token, StaffSchema
-from src.staff.service import StaffServiceDep, oauth2_scheme
+from src.staff.service import StaffServiceDep
 
 staff_router = APIRouter()
 
@@ -33,20 +32,9 @@ async def login(staff_serv: StaffServiceDep, staff_schema: StaffCreateSchema,
 
 
 @staff_router.get("/me/", response_model=StaffSchema)
-async def get_me(staff_serv: StaffServiceDep,
-                 auth: HTTPAuthorizationCredentials = Security(oauth2_scheme)) -> StaffSchema:
-    try:
-        if not auth.credentials:
-            raise HTTPException(status_code=401, detail="No token provided")
-        return await staff_serv.get_current_staff(token=auth.credentials)
-    except HTTPException as http_exc:
-        raise http_exc
-    except Exception as exc:
-        print(exc)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error",
-        ) from exc
+async def get_me(staff_serv: StaffServiceDep
+                 ) -> StaffSchema:
+    return staff_serv
 
 
 @staff_router.post("/")
