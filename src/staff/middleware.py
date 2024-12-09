@@ -19,16 +19,21 @@ async def auth_middleware(token: Annotated[str, Depends(oauth2_scheme)], staff_r
         headers={"WWW-Authenticate": "Bearer"},
     )
     if tg_api_key == settings.tg_bot_api_key:
+        print("tg-key")
         return StaffSchema(name="tg")
     try:
         payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+        print(payload)
         staff_id: uuid.UUID = payload.get("sub")
+        print(staff_id)
         if staff_id is None:
             raise credentials_exception
         token_data = TokenData(staff_id=staff_id)
+        print(token_data)
     except InvalidTokenError:
         raise credentials_exception
     staff = staff_repo.get_by_id(token_data.staff_id)
+    print(staff)
     if staff is None:
         raise credentials_exception
     staff_schema = StaffSchema(name=staff.name, staff_id=staff.staff_id)
