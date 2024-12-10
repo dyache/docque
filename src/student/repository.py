@@ -14,7 +14,7 @@ class StudentRepository:
         VALUES (%s, %s)
         """
         try:
-            self.cursor.execute(query, (student.student_id, student.tg_tag, student.notify))
+            self.cursor.execute(query, (student.student_id, student.notify))
             self.conn.commit()
         except Exception as e:
             self.conn.rollback()
