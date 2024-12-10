@@ -10,8 +10,8 @@ class StudentRepository:
 
     def create(self, student: Student) -> str:
         query = """
-        INSERT INTO "student" (student_id, tg_tag, notify)
-        VALUES (%s, %s, %s)
+        INSERT INTO "student" (student_id, notify)
+        VALUES (%s, %s)
         """
         try:
             self.cursor.execute(query, (student.student_id, student.tg_tag, student.notify))
