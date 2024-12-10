@@ -10,7 +10,6 @@ cur = conn.cursor()
 create_student_table = """
 CREATE TABLE IF NOT EXISTS Student (
     student_id VARCHAR(255) PRIMARY KEY,  
-    tg_tag VARCHAR(255) NOT NULL,         
     notify BOOLEAN NOT NULL               
 );
 """
