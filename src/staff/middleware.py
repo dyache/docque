@@ -19,9 +19,11 @@ async def auth_middleware(token: Annotated[str, Depends(oauth2_scheme)], staff_r
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    print(tg_api_key)
     if tg_api_key == settings.tg_bot_api_key:
         print("tg-key")
         return StaffSchema(name="tg")
+    print("not api key")
     try:
         payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
         print(payload)
