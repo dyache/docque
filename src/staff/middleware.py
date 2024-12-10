@@ -14,6 +14,7 @@ from src.staff.service import oauth2_scheme
 
 async def auth_middleware(token: Annotated[str, Depends(oauth2_scheme)], staff_repo: StaffRepositoryDep,
                           ) -> StaffSchema:
+    print("d")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
