@@ -13,7 +13,7 @@ from src.staff.service import oauth2_scheme
 
 
 async def auth_middleware(token: Annotated[str, Depends(oauth2_scheme)], staff_repo: StaffRepositoryDep,
-                          ) -> StaffSchema:
+                          ) -> StaffSchema | None:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -21,7 +21,7 @@ async def auth_middleware(token: Annotated[str, Depends(oauth2_scheme)], staff_r
     )
     if hmac.compare_digest(token, settings.tg_bot_api_key):
         print("right thing")
-        return StaffSchema(name="tg", staff_id=uuid.uuid4())
+        return None
     print("wrong comparison")
     try:
         payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])

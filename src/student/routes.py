@@ -13,5 +13,5 @@ student_router = APIRouter()
 @student_router.post("/")
 def create(student_serv: StudentServiceDep, student: StudentSchema,
            curr_user: Annotated[StaffSchema, Depends(auth_middleware)]) -> str:
-    print(curr_user)
+    print("creating thang")
     return student_serv.create(student)
