@@ -21,7 +21,7 @@ async def auth_middleware(token: Annotated[str, Depends(oauth2_scheme)], staff_r
         headers={"WWW-Authenticate": "Bearer"},
     )
     if hmac.compare_digest(token, settings.tg_bot_api_key):
-        return StaffSchema(name="tg")
+        return StaffSchema(name="tg", staff_id=uuid.uuid4())
     try:
         payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
         print(payload)
