@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS Queue (
 """
 
 create_queue_history_table = """
-CREATE TABLE IF NOT EXISTS QueueHistory (
+CREATE TABLE IF NOT EXISTS Queue_History (
     queue_id UUID PRIMARY KEY,              
     position INT NULL,                
     student_id VARCHAR(255) REFERENCES student (student_id),
