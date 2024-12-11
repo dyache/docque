@@ -27,10 +27,9 @@ create_queue_table = """
 CREATE TABLE IF NOT EXISTS Queue (
     queue_id UUID PRIMARY KEY,            
     position SERIAL NOT NULL,                
-    student_id VARCHAR(255),
+    student_id VARCHAR(255) REFERENCES student (student_id),
     created_at TIMESTAMP NOT NULL,        
-    status VARCHAR(255) NOT NULL,
-    FOREIGN KEY (student_id) REFERENCES student (student_id)          
+    status VARCHAR(255) NOT NULL
 );
 """
 
@@ -38,10 +37,9 @@ create_queue_history_table = """
 CREATE TABLE IF NOT EXISTS QueueHistory (
     queue_id UUID PRIMARY KEY,              
     position INT NULL,                
-    student_id VARCHAR(256),
+    student_id VARCHAR(255) REFERENCES student (student_id),
     created_at TIMESTAMP NOT NULL,        
     status VARCHAR(255) NOT NULL          
-    FOREIGN KEY (student_id) REFERENCES student (student_id)          
 );
 """
 
