@@ -19,7 +19,7 @@ class QueueRepository:
         INSERT INTO queue (queue_id, status, student_id ,created_at) VALUES (%s, %s, %s, %s)
         """
         try:
-            self.cursor.execute(query, (queue.queue_id, queue.status, queue.student_id, queue.created_at))
+            self.cursor.execute(query, (str(queue.queue_id), queue.status, queue.student_id, queue.created_at))
             self.conn.commit()
         except IntegrityError as e:
             self.conn.rollback()

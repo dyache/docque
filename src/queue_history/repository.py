@@ -1,7 +1,10 @@
 import uuid
 from typing import List
+
 from psycopg2.extensions import cursor, connection
+
 from src.queue_history.model import QueueHistory
+
 
 class QueueHistoryRepository:
     def __init__(self, conn: connection, cur: cursor):
@@ -13,7 +16,7 @@ class QueueHistoryRepository:
         INSERT INTO queue_history (queue_id, status, created_at) VALUES (%s, %s, %s)
         """
         try:
-            self.cursor.execute(query, (queue.queue_id, queue.status, queue.created_at))
+            self.cursor.execute(query, (str(queue.queue_id), queue.status, queue.created_at))
             self.conn.commit()
         except Exception as e:
             self.conn.rollback()
