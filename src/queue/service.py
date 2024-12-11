@@ -19,7 +19,7 @@ class QueueService:
 
     def create(self, student_id: str) -> Optional[uuid.UUID]:
         try:
-            queue_model = Queue(queue_id=uuid.uuid4(), created_at=datetime.datetime.now().timestamp(),
+            queue_model = Queue(queue_id=uuid.uuid4(), created_at=datetime.datetime.now(),
                                 status="on-wait",
                                 position=0, student_id=student_id)
 
