@@ -21,15 +21,17 @@ class QueueService:
         try:
             queue_model = Queue(queue_id=uuid.uuid4(), created_at=datetime.datetime.now().timestamp(), status="on-wait",
                                 position=0, student_id=student_id)
+
+            # TODO: make tx here
+            self.queue_repo.create(queue_model)
             queue_to_insert = self.queue_repo.get_by_id(queue_model.queue_id)
             if not queue_to_insert:
                 raise ValueError("Queue item not found")
             queue_history = QueueHistory(queue_id=queue_to_insert.queue_id, position=queue_to_insert.position,
                                          created_at=queue_to_insert.created_at, status=queue_to_insert.status)
+            return self.queue_history_repo.create(queue_history)
 
-            # TODO: make tx here
-            self.queue_history_repo.create(queue_history)
-            return self.queue_repo.create(queue_model)
+
         except Exception as e:
             print(f"An error occurred while creating the queue: {e}")
             return None
