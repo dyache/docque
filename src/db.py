@@ -27,20 +27,33 @@ create_queue_table = """
 CREATE TABLE IF NOT EXISTS Queue (
     queue_id UUID PRIMARY KEY,            
     position SERIAL NOT NULL,                
+    student_id VARCHAR(255),
     created_at TIMESTAMP NOT NULL,        
-    status VARCHAR(255) NOT NULL          
+    status VARCHAR(255) NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES student (student_id)          
 );
 """
 
 create_queue_history_table = """
 CREATE TABLE IF NOT EXISTS QueueHistory (
-    id SERIAL PRIMARY KEY,               
-    queue_id UUID NOT NULL,              
+    queue_id UUID PRIMARY KEY,              
     position INT NULL,                
+    student_id VARCHAR(256),
     created_at TIMESTAMP NOT NULL,        
     status VARCHAR(255) NOT NULL          
+    FOREIGN KEY (student_id) REFERENCES student (student_id)          
 );
 """
+
+create_settings_table = """
+CREATE TABLE IF NOT EXISTS Setting (
+    setting_id UUID PRIMARY KEY,
+    queue_reset_enabled NOT NULL DEFAULT FALSE,
+    queue_reset_day VARCHAR(50) NOT NULL DEFAULT 'Everyday'
+    queue_reset_at TIME NOT NULL 
+)
+"""
+
 cur.execute(create_student_table)
 cur.execute(create_staff_table)
 cur.execute(create_queue_table)

@@ -9,3 +9,6 @@ class QueueSchema(BaseModel):
     position: int
     status: str
     created_at: datetime.time
+
+class QueueCreateSchema(BaseModel):
+    student_id: str

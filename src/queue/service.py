@@ -1,13 +1,15 @@
 import datetime
 import uuid
 from typing import List, Optional, Annotated
+
+from fastapi import Depends
+
+from src.db import cur, conn
 from src.queue.models import Queue
 from src.queue.repository import QueueRepository
 from src.queue.schema import QueueSchema
 from src.queue_history.model import QueueHistory
 from src.queue_history.repository import QueueHistoryRepository
-from src.db import cur, conn
-from fastapi import Depends
 
 
 class QueueService:
@@ -15,14 +17,16 @@ class QueueService:
         self.queue_repo: QueueRepository = queue_repo
         self.queue_history_repo: QueueHistoryRepository = queue_history_repo
 
-    def create(self) -> Optional[uuid.UUID]:
+    def create(self, student_id: str) -> Optional[uuid.UUID]:
         try:
-            queue_model = Queue(queue_id=uuid.uuid4(), created_at=datetime.datetime.now().timestamp(), status="on-wait")
+            queue_model = Queue(queue_id=uuid.uuid4(), created_at=datetime.datetime.now().timestamp(), status="on-wait",
+                                position=0, student_id=student_id)
             queue_to_insert = self.queue_repo.get_by_id(queue_model.queue_id)
             if not queue_to_insert:
                 raise ValueError("Queue item not found")
             queue_history = QueueHistory(queue_id=queue_to_insert.queue_id, position=queue_to_insert.position,
                                          created_at=queue_to_insert.created_at, status=queue_to_insert.status)
+
             # TODO: make tx here
             self.queue_history_repo.create(queue_history)
             return self.queue_repo.create(queue_model)
@@ -43,7 +47,9 @@ class QueueService:
             print(f"An error occurred while retrieving the queue: {e}")
             return None
 
+
 def get_queue_service() -> QueueService:
     return QueueService(QueueRepository(conn, cur), QueueHistoryRepository(conn, cur))
-QueueServiceDep = Annotated[QueueService, Depends(get_queue_service)]
 
+
+QueueServiceDep = Annotated[QueueService, Depends(get_queue_service)]
