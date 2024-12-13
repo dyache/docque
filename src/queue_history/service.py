@@ -27,6 +27,7 @@ class QueueHistoryService:
                 queue_history_schemas.append(queue_history_schema)
             return queue_history_schemas
         except Exception as e:
+            print(str(e))
             raise DataException("error getting all tickets")
 
 
