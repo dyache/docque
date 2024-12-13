@@ -16,11 +16,14 @@ class TokenData(BaseModel):
 class StaffSchema(BaseModel):
     staff_id: uuid.UUID
     name: str
+    current_queue_number: Optional[int] = None
+
 
 class StaffCreateSchema(BaseModel):
     name: str
     password: str
-    
+
+
 class StaffUpdateSchema(BaseModel):
     staff_id: uuid.UUID
     name: Optional[str] = None

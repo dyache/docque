@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone, timedelta
-from typing import Annotated
+from typing import Annotated, List
 
 import bcrypt
 import jwt
@@ -12,7 +12,7 @@ from src.db import cur, conn
 from src.staff.exception import StaffNotFoundException
 from src.staff.models import Staff
 from src.staff.repository import StaffRepository
-from src.staff.schema import StaffSchema, StaffCreateSchema
+from src.staff.schema import StaffSchema, StaffCreateSchema, StaffUpdateSchema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 security = HTTPBearer()
