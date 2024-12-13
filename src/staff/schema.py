@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -19,3 +20,9 @@ class StaffSchema(BaseModel):
 class StaffCreateSchema(BaseModel):
     name: str
     password: str
+    
+class StaffUpdateSchema(BaseModel):
+    staff_id: uuid.UUID
+    name: Optional[str] = None
+    password: Optional[str] = None
+    current_queue_number: Optional[int] = None

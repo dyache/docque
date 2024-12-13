@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer, HTTPBearer
 
 from src.config import Config
 from src.db import cur, conn
+from src.staff.exception import StaffNotFoundException
 from src.staff.models import Staff
 from src.staff.repository import StaffRepository
 from src.staff.schema import StaffSchema, StaffCreateSchema
@@ -36,11 +37,7 @@ class StaffService:
 
     def authenticate_staff(self, name: str, password: str) -> bool | StaffSchema:
         staff = self.staff_repo.get_by_name(name)
-        print(staff.hashed_password)
-        print(staff.name)
-        if not staff:
-            return False
-        if not self.verify_password(password, staff.hashed_password):
+        if not staff or not self.verify_password(password, staff.hashed_password):
             return False
         staff_schema = StaffSchema(name=staff.name, staff_id=staff.staff_id)
         return staff_schema
@@ -53,12 +50,74 @@ class StaffService:
         return encoded_jwt
 
     def create_staff(self, staff: StaffCreateSchema) -> uuid.UUID:
-        model_staff = Staff(staff_id=uuid.uuid4(), name=staff.name, hashed_password=self.hash_password(staff.password),
-                            current_queue_number=0)
+        model_staff = Staff(
+            staff_id=uuid.uuid4(),
+            name=staff.name,
+            hashed_password=self.hash_password(staff.password),
+            current_queue_number=0
+        )
         try:
             return self.staff_repo.create(model_staff)
         except Exception as e:
-            raise RuntimeError(f"error creating staff {e}")
+            raise RuntimeError(f"Error creating staff: {e}")
+
+    def get_staff_by_id(self, staff_id: uuid.UUID) -> StaffSchema:
+        try:
+            staff = self.staff_repo.get_by_id(staff_id)
+            return StaffSchema(
+                staff_id=staff.staff_id,
+                name=staff.name,
+                current_queue_number=staff.current_queue_number
+            )
+        except StaffNotFoundException as e:
+            raise RuntimeError(f"Error retrieving staff: {e}")
+
+    def get_staff_by_name(self, name: str) -> StaffSchema:
+        try:
+            staff = self.staff_repo.get_by_name(name)
+            return StaffSchema(
+                staff_id=staff.staff_id,
+                name=staff.name,
+                current_queue_number=staff.current_queue_number
+            )
+        except StaffNotFoundException as e:
+            raise RuntimeError(f"Error retrieving staff: {e}")
+
+    def get_all_staff(self) -> List[StaffSchema]:
+        try:
+            staff_list = self.staff_repo.get_all()
+            return [
+                StaffSchema(
+                    staff_id=staff.staff_id,
+                    name=staff.name,
+                    current_queue_number=staff.current_queue_number
+                )
+                for staff in staff_list
+            ]
+        except Exception as e:
+            raise RuntimeError(f"Error retrieving staff list: {e}")
+
+    def update_staff(self, staff: StaffUpdateSchema) -> bool:
+        try:
+            model_staff = Staff(
+                staff_id=staff.staff_id,
+                name=staff.name,
+                hashed_password=self.hash_password(staff.password),
+                current_queue_number=staff.current_queue_number
+            )
+            return self.staff_repo.update(model_staff)
+        except StaffNotFoundException as e:
+            raise RuntimeError(f"Error updating staff: {e}")
+        except Exception as e:
+            raise RuntimeError(f"Error updating staff: {e}")
+
+    def delete_staff(self, staff_id: uuid.UUID) -> bool:
+        try:
+            return self.staff_repo.delete(staff_id)
+        except StaffNotFoundException as e:
+            raise RuntimeError(f"Error deleting staff: {e}")
+        except Exception as e:
+            raise RuntimeError(f"Error deleting staff: {e}")
 
 
 def get_staff_service() -> StaffService:
