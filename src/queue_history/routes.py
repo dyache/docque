@@ -22,6 +22,7 @@ def get_all(queue_history_serv: QueueHistoryServiceDep,
             detail=str(e)
         )
     except Exception as exc:
+        print(exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
