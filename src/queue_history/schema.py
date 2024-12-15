@@ -8,4 +8,4 @@ class QueueHistorySchema(BaseModel):
     queue_id: uuid.UUID
     position: int
     status: str
-    created_at: datetime.time
+    created_at: datetime.datetime
