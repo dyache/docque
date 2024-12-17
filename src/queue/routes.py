@@ -47,13 +47,8 @@ class AssignedTicketResponse(BaseModel):
 @queue_router.post("/next", response_model=Optional[AssignedTicketResponse])
 def assign_next_ticket(
         curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
-    """
-    Assign the next available ticket to a staff member, ensuring no ticket is assigned twice.
-    Automatically updates the Queue_History table.
-    """
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Find the next available ticket with status 'waiting', lock it to prevent race conditions
             cur.execute("""
                 SELECT q.queue_id, q.position, q.student_id, q.created_at, s.staff_id
                 FROM Queue q
@@ -62,7 +57,7 @@ def assign_next_ticket(
                 ORDER BY q.position ASC
                 LIMIT 1
                 FOR UPDATE SKIP LOCKED;
-            """, (curr_user.staff_id,))
+            """, (str(curr_user.staff_id),))
             ticket = cur.fetchone()
 
             if not ticket:
@@ -80,18 +75,18 @@ def assign_next_ticket(
                 WHERE staff_id = %s;
             """, (position, str(curr_user.staff_id)))
 
-            # Mark the ticket as 'in_progress'
             cur.execute("""
                 UPDATE Queue
                 SET status = 'in_progress'
                 WHERE queue_id = %s;
             """, (str(queue_id),))
 
-            # Insert the ticket into Queue_History with the 'in_progress' status
             cur.execute("""
                 INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
                 VALUES (%s, %s, %s, %s, 'in_progress');
             """, (str(queue_id), position, student_id, created_at))
+
+            conn.commit()
 
             return {
                 "queue_id": str(queue_id),
@@ -103,4 +98,5 @@ def assign_next_ticket(
             }
 
     except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Error assigning next ticket: {e}")
