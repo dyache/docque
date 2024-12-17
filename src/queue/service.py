@@ -17,6 +17,45 @@ class QueueService:
         self.queue_repo: QueueRepository = queue_repo
         self.queue_history_repo: QueueHistoryRepository = queue_history_repo
 
+    def assign_next_ticket(self, conn, staff_id):
+        try:
+            cur = conn.cursor()
+
+            cur.execute("""
+                SELECT queue_id, position 
+                FROM Queue 
+                WHERE status = 'unassigned'
+                ORDER BY created_at ASC
+                LIMIT 1
+            """)
+            ticket = cur.fetchone()
+
+            if not ticket:
+                print("No tickets available to assign.")
+                return
+
+            queue_id, position = ticket
+
+            cur.execute("""
+                UPDATE Queue 
+                SET status = 'assigned'
+                WHERE queue_id = %s
+            """, (queue_id,))
+
+            cur.execute("""
+                UPDATE Staff 
+                SET current_queue_number = %s
+                WHERE staff_id = %s
+            """, (position, staff_id))
+
+            conn.commit()
+            print(f"Ticket {queue_id} (position {position}) assigned to staff {staff_id}.")
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            conn.rollback()
+        finally:
+            cur.close()
+
     def create(self, student_id: str) -> Optional[uuid.UUID]:
         try:
             queue_model = Queue(queue_id=uuid.uuid4(), created_at=datetime.datetime.now(),
