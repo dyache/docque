@@ -57,15 +57,19 @@ def assign_next_ticket(
             if not staff:
                 raise HTTPException(status_code=404, detail="Staff member not found.")
 
+            # Debugging: Log available tickets
+            cur.execute("SELECT * FROM Queue;")
+            print("All Queue Data:", cur.fetchall())
+
             # Find the next available ticket (status = 'waiting') and lock it
             cur.execute("""
-                    SELECT queue_id, position, student_id, created_at
-                    FROM Queue
-                    WHERE status = 'waiting'
-                    ORDER BY position ASC
-                    LIMIT 1
-                    FOR UPDATE SKIP LOCKED;
-                """)
+                SELECT queue_id, position, student_id, created_at
+                FROM Queue
+                WHERE status = 'waiting'
+                ORDER BY position ASC
+                LIMIT 1
+                FOR UPDATE SKIP LOCKED;
+            """)
             ticket = cur.fetchone()
 
             if not ticket:
@@ -78,23 +82,23 @@ def assign_next_ticket(
 
             # Update the staff's current queue position
             cur.execute("""
-                    UPDATE Staff
-                    SET current_queue_number = %s
-                    WHERE staff_id = %s;
-                """, (position, staff_id))
+                UPDATE Staff
+                SET current_queue_number = %s
+                WHERE staff_id = %s;
+            """, (position, staff_id))
 
             # Mark the ticket as 'in_progress'
             cur.execute("""
-                    UPDATE Queue
-                    SET status = 'in_progress'
-                    WHERE queue_id = %s;
-                """, (queue_id,))
+                UPDATE Queue
+                SET status = 'in_progress'
+                WHERE queue_id = %s;
+            """, (queue_id,))
 
             # Log the assignment in Queue_History
             cur.execute("""
-                    INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
-                    VALUES (%s, %s, %s, %s, 'in_progress');
-                """, (queue_id, position, student_id, created_at))
+                INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
+                VALUES (%s, %s, %s, %s, 'in_progress');
+            """, (queue_id, position, student_id, created_at))
 
             return {
                 "queue_id": queue_id,
