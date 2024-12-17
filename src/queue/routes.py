@@ -78,26 +78,26 @@ def assign_next_ticket(
                 UPDATE Staff
                 SET current_queue_number = %s
                 WHERE staff_id = %s;
-            """, (position, curr_user.staff_id))
+            """, (position, str(curr_user.staff_id)))
 
             # Mark the ticket as 'in_progress'
             cur.execute("""
                 UPDATE Queue
                 SET status = 'in_progress'
                 WHERE queue_id = %s;
-            """, (queue_id,))
+            """, (str(queue_id),))
 
             # Insert the ticket into Queue_History with the 'in_progress' status
             cur.execute("""
                 INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
                 VALUES (%s, %s, %s, %s, 'in_progress');
-            """, (queue_id, position, student_id, created_at))
+            """, (str(queue_id), position, student_id, created_at))
 
             return {
-                "queue_id": queue_id,
+                "queue_id": str(queue_id),
                 "position": position,
                 "student_id": student_id,
-                "staff_id": curr_user.staff_id,
+                "staff_id": str(curr_user.staff_id),
                 "created_at": created_at,
                 "status": "in_progress"
             }
