@@ -54,7 +54,7 @@ class StaffService:
             staff_id=uuid.uuid4(),
             name=staff.name,
             hashed_password=self.hash_password(staff.password),
-            current_queue_number=0
+            current_queue_number=-1
         )
         try:
             return self.staff_repo.create(model_staff)

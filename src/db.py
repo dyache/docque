@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Staff (
     staff_id UUID PRIMARY KEY,             
     staff_name VARCHAR(255) NOT NULL,            
     hashed_password TEXT NOT NULL,         
-    current_queue_number INT
+    current_queue_number INT DEFAULT -1
 );
 """
 
