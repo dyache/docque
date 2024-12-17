@@ -5,7 +5,6 @@ from fastapi import APIRouter, HTTPException, Depends
 from psycopg2.extras import RealDictCursor
 from pydantic import BaseModel
 
-from src.db import conn
 from src.queue.schema import QueueSchema, QueueCreateSchema
 from src.queue.service import QueueServiceDep
 from src.staff.middleware import auth_middleware
@@ -45,19 +44,29 @@ class AssignedTicketResponse(BaseModel):
 
 
 @queue_router.post("/next", response_model=Optional[AssignedTicketResponse])
-def assign_next_ticket(
-        curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
+def assign_next_ticket(staff_id: str, conn=Depends(get_db_connection)):
+    """
+    Assign the next available ticket to a staff member, ensuring no ticket is assigned twice.
+    Automatically updates the Queue_History table.
+    """
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Ensure staff exists
+            cur.execute("SELECT staff_id FROM Staff WHERE staff_id = %s;", (staff_id,))
+            staff = cur.fetchone()
+
+            if not staff:
+                raise HTTPException(status_code=404, detail="Staff member not found.")
+
+            # Find the next available ticket (status = 'waiting') and lock it
             cur.execute("""
-                SELECT q.queue_id, q.position, q.student_id, q.created_at, s.staff_id
-                FROM Queue q
-                LEFT JOIN Staff s ON s.staff_id = %s
-                WHERE q.status = 'waiting'
-                ORDER BY q.position ASC
+                SELECT queue_id, position, student_id, created_at
+                FROM Queue
+                WHERE status = 'waiting'
+                ORDER BY position ASC
                 LIMIT 1
                 FOR UPDATE SKIP LOCKED;
-            """, (str(curr_user.staff_id),))
+            """)
             ticket = cur.fetchone()
 
             if not ticket:
@@ -68,35 +77,34 @@ def assign_next_ticket(
             student_id = ticket["student_id"]
             created_at = ticket["created_at"]
 
-            # Update Staff's current queue position
+            # Update the staff's current queue position
             cur.execute("""
                 UPDATE Staff
                 SET current_queue_number = %s
                 WHERE staff_id = %s;
-            """, (position, str(curr_user.staff_id)))
+            """, (position, staff_id))
 
+            # Mark the ticket as 'in_progress'
             cur.execute("""
                 UPDATE Queue
                 SET status = 'in_progress'
                 WHERE queue_id = %s;
-            """, (str(queue_id),))
+            """, (queue_id,))
 
+            # Log the assignment in Queue_History
             cur.execute("""
                 INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
                 VALUES (%s, %s, %s, %s, 'in_progress');
-            """, (str(queue_id), position, student_id, created_at))
-
-            conn.commit()
+            """, (queue_id, position, student_id, created_at))
 
             return {
-                "queue_id": str(queue_id),
+                "queue_id": queue_id,
                 "position": position,
                 "student_id": student_id,
-                "staff_id": str(curr_user.staff_id),
+                "staff_id": staff_id,
                 "created_at": created_at,
                 "status": "in_progress"
             }
 
     except Exception as e:
-        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Error assigning next ticket: {e}")
