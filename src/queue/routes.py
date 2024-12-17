@@ -50,22 +50,13 @@ def assign_next_ticket(
     staff_id = str(curr_user.staff_id)
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Ensure staff exists
-            cur.execute("SELECT staff_id FROM Staff WHERE staff_id = %s;", (staff_id,))
-            staff = cur.fetchone()
-
-            if not staff:
-                raise HTTPException(status_code=404, detail="Staff member not found.")
-
-            # Debugging: Log available tickets
             cur.execute("SELECT * FROM Queue;")
             print("All Queue Data:", cur.fetchall())
 
-            # Find the next available ticket (status = 'waiting') and lock it
             cur.execute("""
                 SELECT queue_id, position, student_id, created_at
                 FROM Queue
-                WHERE status = 'waiting'
+                WHERE status = 'on-wait'
                 ORDER BY position ASC
                 LIMIT 1
                 FOR UPDATE SKIP LOCKED;
@@ -90,14 +81,14 @@ def assign_next_ticket(
             # Mark the ticket as 'in_progress'
             cur.execute("""
                 UPDATE Queue
-                SET status = 'in_progress'
+                SET status = 'in-progress'
                 WHERE queue_id = %s;
             """, (queue_id,))
 
             # Log the assignment in Queue_History
             cur.execute("""
                 INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
-                VALUES (%s, %s, %s, %s, 'in_progress');
+                VALUES (%s, %s, %s, %s, 'in-progress');
             """, (queue_id, position, student_id, created_at))
 
             return {
