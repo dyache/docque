@@ -29,11 +29,11 @@ async def auth_middleware(token: Annotated[str, Depends(oauth2_scheme)], staff_r
         if staff_id is None:
             raise credentials_exception
         token_data = TokenData(staff_id=staff_id)
-        print(token_data)
     except InvalidTokenError:
         raise credentials_exception
     staff = staff_repo.get_by_id(token_data.staff_id)
     if staff is None:
         raise credentials_exception
-    staff_schema = StaffSchema(name=staff.name, staff_id=staff.staff_id)
+    staff_schema = StaffSchema(name=staff.name, staff_id=staff.staff_id,
+                               current_queue_number=staff.current_queue_number)
     return staff_schema
