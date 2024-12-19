@@ -78,13 +78,13 @@ $$ LANGUAGE plpgsql;
 """
 cur.execute(create_trigger_function)
 
-create_trigger = """
-CREATE TRIGGER after_queue_update
-AFTER UPDATE ON Queue
-FOR EACH ROW
-EXECUTE FUNCTION log_queue_updates();
-"""
-cur.execute(create_trigger)
+# create_trigger = """
+# CREATE OR REPLACE TRIGGER after_queue_update
+# AFTER UPDATE ON Queue
+# FOR EACH ROW
+# EXECUTE FUNCTION log_queue_updates();
+# """
+# cur.execute(create_trigger)
 
 create_view_inner_join = """
 CREATE OR REPLACE VIEW staff_with_queue AS
@@ -101,7 +101,6 @@ FROM Queue q
 LEFT JOIN Staff s ON q.position = s.current_queue_number;
 """
 cur.execute(create_view_left_join)
-
 
 try:
     conn.commit()
