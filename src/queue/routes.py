@@ -89,8 +89,6 @@ def next_ticket(curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
         AND status = 'on-wait';        
         """)
         ticket = cur.fetchone()
-        print(ticket)
-
         if not ticket:
             raise HTTPException(status_code=404, detail="No tickets available for assignment.")
 
