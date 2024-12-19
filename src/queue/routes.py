@@ -35,7 +35,7 @@ def get_all(queue_serv: QueueServiceDep,
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the queue: {e}")
 
 
-@queue_router.get("/{queue_id}")
+@queue_router.get("/{queue_id}", response_model=QueueSchema)
 def get_by_id(queue_id: uuid.UUID,
               queue_serv: QueueServiceDep,
               curr_user: Annotated[StaffSchema, Depends(auth_middleware)]
