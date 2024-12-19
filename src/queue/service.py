@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from typing import List, Optional, Annotated
+from typing import List, Annotated
 
 from fastapi import Depends
 
@@ -17,13 +17,12 @@ class QueueService:
         self.queue_repo: QueueRepository = queue_repo
         self.queue_history_repo: QueueHistoryRepository = queue_history_repo
 
-    def create(self, student_id: str) -> Optional[uuid.UUID]:
+    def create(self, student_id: str) -> uuid.UUID:
         try:
             queue_model = Queue(queue_id=uuid.uuid4(), created_at=datetime.datetime.now(),
                                 status="on-wait",
                                 position=0, student_id=student_id)
 
-            # TODO: make tx here
             self.queue_repo.create(queue_model)
             queue_history = QueueHistory(queue_id=queue_model.queue_id, position=queue_model.position,
                                          created_at=queue_model.created_at, status=queue_model.status)
@@ -31,10 +30,9 @@ class QueueService:
 
 
         except Exception as e:
-            print(f"An error occurred while creating the queue: {e}")
-            return None
+            raise RuntimeError("an error occured while creating queue")
 
-    def get_all_sort_by_position(self) -> Optional[List[QueueSchema]]:
+    def get_all_sort_by_position(self) -> List[QueueSchema]:
         try:
             queue = self.queue_repo.get_all_sort_by_position()
             queue_schemas: List[QueueSchema] = []
@@ -44,8 +42,16 @@ class QueueService:
                 queue_schemas.append(queue_schema)
             return queue_schemas
         except Exception as e:
-            print(f"An error occurred while retrieving the queue: {e}")
-            return None
+            raise RuntimeError("an error occured while getting all queue")
+
+    def get_by_id(self, id: uuid.UUID) -> QueueSchema:
+        try:
+            queue = self.queue_repo.get_by_id(id)
+            queue_schema = QueueSchema(queue_id=id, position=queue.position, status=queue.status,
+                                       created_at=queue.created_at)
+            return queue_schema
+        except Exception as e:
+            raise RuntimeError("an error occured while getting queue by id")
 
 
 def get_queue_service() -> QueueService:

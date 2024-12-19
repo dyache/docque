@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from typing import List, Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -30,6 +31,17 @@ def get_all(queue_serv: QueueServiceDep,
             ) -> List[QueueSchema]:
     try:
         return queue_serv.get_all_sort_by_position()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the queue: {e}")
+
+
+@queue_router.get("/{queue_id}")
+def get_by_id(queue_id: uuid.UUID,
+              queue_serv: QueueServiceDep,
+              curr_user: Annotated[StaffSchema, Depends(auth_middleware)]
+              ):
+    try:
+        return queue_serv.get_by_id(queue_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the queue: {e}")
 
