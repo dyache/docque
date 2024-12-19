@@ -64,19 +64,19 @@ CREATE INDEX IF NOT EXISTS idx_queue_position ON Queue (position);
 """
 cur.execute(create_position_index)
 
-create_trigger_function = """
-CREATE OR REPLACE FUNCTION log_queue_updates()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.status IS DISTINCT FROM OLD.status THEN
-        INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
-        VALUES (NEW.queue_id, NEW.position, NEW.student_id, NEW.created_at, NEW.status);
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-"""
-cur.execute(create_trigger_function)
+# create_trigger_function = """
+# CREATE OR REPLACE FUNCTION log_queue_updates()
+# RETURNS TRIGGER AS $$
+# BEGIN
+#     IF NEW.status IS DISTINCT FROM OLD.status THEN
+#         INSERT INTO Queue_History (queue_id, position, student_id, created_at, status)
+#         VALUES (NEW.queue_id, NEW.position, NEW.student_id, NEW.created_at, NEW.status);
+#     END IF;
+#     RETURN NEW;
+# END;
+# $$ LANGUAGE plpgsql;
+# """
+# cur.execute(create_trigger_function)
 
 # create_trigger = """
 # CREATE OR REPLACE TRIGGER after_queue_update
