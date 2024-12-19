@@ -50,8 +50,6 @@ def assign_next_ticket(
     staff_id = str(curr_user.staff_id)
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM Queue;")
-            print("All Queue Data:", cur.fetchall())
 
             cur.execute("""
                 SELECT queue_id, position, student_id, created_at
@@ -91,6 +89,7 @@ def assign_next_ticket(
                 VALUES (%s, %s, %s, %s, 'in-progress');
             """, (queue_id, position, student_id, created_at))
 
+            conn.commit()
             return {
                 "queue_id": queue_id,
                 "position": position,
@@ -101,4 +100,5 @@ def assign_next_ticket(
             }
 
     except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Error assigning next ticket: {e}")

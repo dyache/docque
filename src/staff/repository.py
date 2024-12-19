@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated, List
+from typing import Annotated, List, Dict, Any
 
 from fastapi import Depends
 from psycopg2.extensions import cursor, connection
@@ -100,6 +100,47 @@ class StaffRepository:
             return True
         except Exception as e:
             self.conn.rollback()
+            raise RuntimeError(f"database error occurred {e}")
+    
+
+    def get_staff_with_queue(self) -> List[Dict[str, Any]]:
+        query = """
+        SELECT staff_id, staff_name, queue_id, position, status
+        FROM staff_with_queue
+        """
+        try:
+            self.cursor.execute(query)
+            result = self.cursor.fetchall()
+            return [
+                {
+                    "staff_id": row[0],
+                    "staff_name": row[1],
+                    "queue_id": row[2],
+                    "position": row[3],
+                    "status": row[4]
+                } for row in result
+            ]
+        except Exception as e:
+            raise RuntimeError(f"database error occurred {e}")
+
+    def get_queue_with_staff_info(self) -> List[Dict[str, Any]]:
+        query = """
+        SELECT queue_id, position, status, staff_name, staff_id
+        FROM queue_with_staff_info
+        """
+        try:
+            self.cursor.execute(query)
+            result = self.cursor.fetchall()
+            return [
+                {
+                    "queue_id": row[0],
+                    "position": row[1],
+                    "status": row[2],
+                    "staff_name": row[3],
+                    "staff_id": row[4]
+                } for row in result
+            ]
+        except Exception as e:
             raise RuntimeError(f"database error occurred {e}")
 
 

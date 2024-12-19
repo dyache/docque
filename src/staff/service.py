@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone, timedelta
-from typing import Annotated, List
+from typing import Annotated, List, Dict, Any
 
 import bcrypt
 import jwt
@@ -118,6 +118,19 @@ class StaffService:
             raise RuntimeError(f"Error deleting staff: {e}")
         except Exception as e:
             raise RuntimeError(f"Error deleting staff: {e}")
+    
+
+    def get_staff_with_queue(self) -> List[Dict[str, Any]]:
+        try:
+            return self.staff_repo.get_staff_with_queue()
+        except Exception as e:
+            raise RuntimeError(f"Error retrieving staff with queue info: {e}")
+
+    def get_queue_with_staff_info(self) -> List[Dict[str, Any]]:
+        try:
+            return self.staff_repo.get_queue_with_staff_info()
+        except Exception as e:
+            raise RuntimeError(f"Error retrieving queue with staff info: {e}")
 
 
 def get_staff_service() -> StaffService:

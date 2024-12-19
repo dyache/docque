@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated, List, Dict, Any
 from uuid import UUID
 
 from fastapi import HTTPException, status, APIRouter, Depends
@@ -136,4 +136,28 @@ def delete_staff(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error deleting staff member",
+        ) from exc
+
+
+@staff_router.get("/queue", response_model=List[dict])
+def get_staff_with_queue(staff_serv: StaffServiceDep):
+    try:
+        return staff_serv.get_staff_with_queue()
+    except Exception as exc:
+        print(exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        ) from exc
+
+
+@staff_router.get("/queue/staff-info", response_model=List[Dict[str, Any]])
+def get_queue_with_staff_info(staff_serv: StaffServiceDep):
+    try:
+        return staff_serv.get_queue_with_staff_info()
+    except Exception as exc:
+        print(exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
         ) from exc
