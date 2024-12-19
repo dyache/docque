@@ -47,25 +47,24 @@ class AssignedTicketResponse(BaseModel):
 def next_ticket(curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
     staff_id = str(curr_user.staff_id)
     try:
-
         cur.execute("""
         SELECT current_queue_number
         FROM Staff
         WHERE staff_id = %s
-        """, (staff_id))
+        """, (staff_id,))
         cqn = cur.fetchone()
 
         cur.execute("""
         UPDATE Queue
         SET status = 'served'
         WHERE position = %s
-        """, (cqn[0]))
+        """, (cqn[0],))
 
         cur.execute("""
         UPDATE Queue_History
         SET status = 'served'
         WHERE position = %s
-        """, (cqn[0]))
+        """, (cqn[0],))
 
         cur.execute("""
         SELECT queue_id ,MIN(position)
