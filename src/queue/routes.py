@@ -1,9 +1,7 @@
-import datetime
 import uuid
-from typing import List, Annotated, Optional
+from typing import List, Annotated
 
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
 
 from src.db import conn, cur
 from src.queue.schema import QueueSchema, QueueCreateSchema
@@ -46,16 +44,7 @@ def get_by_id(queue_id: uuid.UUID,
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the queue: {e}")
 
 
-class AssignedTicketResponse(BaseModel):
-    queue_id: str
-    position: int
-    student_id: Optional[str]
-    staff_id: str
-    created_at: datetime.time
-    status: str
-
-
-@queue_router.post("/next", response_model=Optional[AssignedTicketResponse])
+@queue_router.post("/next")
 def next_ticket(curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
     staff_id = str(curr_user.staff_id)
     try:
@@ -89,17 +78,8 @@ def next_ticket(curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
         AND status = 'on-wait';        
         """)
         ticket = cur.fetchone()
-        if not ticket and cqn == -1:
-            raise HTTPException(status_code=404, detail="No tickets available for assignment.")
         if not ticket:
-            pos = -1
-            cur.execute("""
-                    UPDATE Staff
-                    SET current_queue_number = %s
-                    WHERE staff_id = %s;
-                """, (pos, staff_id))
-            conn.commit()
-            return
+            raise HTTPException(status_code=404, detail="No tickets available for assignment.")
 
         pos = ticket[1]
         q_id = ticket[0]
