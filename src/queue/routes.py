@@ -89,8 +89,17 @@ def next_ticket(curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
         AND status = 'on-wait';        
         """)
         ticket = cur.fetchone()
-        if not ticket:
+        if not ticket and cqn == -1:
             raise HTTPException(status_code=404, detail="No tickets available for assignment.")
+        if not ticket:
+            pos = -1
+            cur.execute("""
+                    UPDATE Staff
+                    SET current_queue_number = %s
+                    WHERE staff_id = %s;
+                """, (pos, staff_id))
+            conn.commit()
+            return
 
         pos = ticket[1]
         q_id = ticket[0]
