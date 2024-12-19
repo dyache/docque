@@ -67,12 +67,17 @@ def next_ticket(curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
         """, (cqn[0],))
 
         cur.execute("""
-        SELECT queue_id, MIN(position)
+        SELECT queue_id, position
+        FROM Queue
+        WHERE position = (
+        SELECT MIN(position)
         FROM Queue
         WHERE status = 'on-wait'
-        GROUP BY queue_id
+        )
+        AND status = 'on-wait';        
         """)
         ticket = cur.fetchone()
+        print(ticket)
 
         if not ticket:
             raise HTTPException(status_code=404, detail="No tickets available for assignment.")
