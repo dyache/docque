@@ -8,11 +8,11 @@ from src.db import cur, conn
 from src.staff.exception import StaffNotFoundException
 from src.staff.models import Staff
 
+
 class StaffRepository:
     def __init__(self, conn: connection, cur: cursor):
         self.cursor: cursor = cur
         self.conn: connection = conn
-
 
     def create(self, staff: Staff) -> uuid.UUID:
         query = """
@@ -26,7 +26,6 @@ class StaffRepository:
             self.conn.rollback()
             raise RuntimeError(f"database error occurred {e}")
         return staff.staff_id
-
 
     def get_by_name(self, name: str) -> Staff:
         query = """
@@ -44,7 +43,6 @@ class StaffRepository:
         except Exception as e:
             raise RuntimeError(f"database error occurred {e}")
 
-
     def get_by_id(self, staff_id: uuid.UUID) -> Staff:
         query = """
         SELECT staff_id, staff_name, current_queue_number, hashed_password
@@ -55,12 +53,12 @@ class StaffRepository:
             self.cursor.execute(query, (str(staff_id),))
             result = self.cursor.fetchone()
             if result:
-                return Staff(*result)
+                print(result)
+                return Staff(result[0], result[1], result[2], result[3])
             else:
                 raise StaffNotFoundException(f"Staff member with id '{staff_id}' not found")
         except Exception as e:
             raise RuntimeError(f"database error occurred {e}")
-
 
     def get_all(self) -> List[Staff]:
         query = """
@@ -75,7 +73,6 @@ class StaffRepository:
         except Exception as e:
             raise RuntimeError(f"database error occurred {e}")
 
-
     def delete(self, staff_id: uuid.UUID) -> bool:
         query = """
         DELETE FROM staff WHERE staff_id = %s
@@ -88,20 +85,19 @@ class StaffRepository:
             self.conn.rollback()
             raise RuntimeError(f"database error occurred {e}")
 
-
     def update(self, staff: Staff) -> bool:
         query = """
         UPDATE staff SET staff_name = %s, hashed_password = %s, current_queue_number = %s
         WHERE staff_id = %s
         """
         try:
-            self.cursor.execute(query, (staff.name, staff.hashed_password, staff.current_queue_number, str(staff.staff_id)))
+            self.cursor.execute(query,
+                                (staff.name, staff.hashed_password, staff.current_queue_number, str(staff.staff_id)))
             self.conn.commit()
             return True
         except Exception as e:
             self.conn.rollback()
             raise RuntimeError(f"database error occurred {e}")
-    
 
     def get_staff_with_queue(self) -> List[Dict[str, Any]]:
         query = """
