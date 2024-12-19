@@ -67,9 +67,10 @@ def next_ticket(curr_user: Annotated[StaffSchema, Depends(auth_middleware)]):
         """, (cqn[0],))
 
         cur.execute("""
-        SELECT queue_id ,MIN(position)
+        SELECT queue_id, MIN(position)
         FROM Queue
         WHERE status = 'on-wait'
+        GROUP BY queue_id
         """)
         ticket = cur.fetchone()
 
